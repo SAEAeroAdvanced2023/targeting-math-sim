@@ -66,7 +66,7 @@ def change_ext(directory,init,out):
 #this file contains all transformation matricies for the geo-location of the target
 
 def Transformation_translation(x, y, z):
-    T_translation = np.array([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]])
+    T_translation = np.array([[1,0,0,x],[0,1,0,y],[0,0,1,-z],[0,0,0,1]])
     T_translation_inverse = np.linalg.inv(T_translation)
     return T_translation, T_translation_inverse
 

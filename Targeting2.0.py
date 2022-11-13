@@ -24,7 +24,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     #target coord in camera
     pix = np.array([[963],[2000],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
     #distance of center of rotation of gimbal from centroid of PA
-    g_dist = np.array([0,0,0])
+    g_dist = np.array([3,-2,-4])
     #distance of camera center vision from center of rotation of gimbal
     c_dis = np.array([0,0,0])
     f = 1450*0.0003741
@@ -34,7 +34,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     trans_c = Transformation_translation(g_dist[0], g_dist[1], g_dist[2])
     rot_g = Transformation_rotation_2(g_roll, g_pitch, g_yaw)
     trans_g = Transformation_translation(g_dist[0], g_dist[1], g_dist[2])
-    rot_v = Transformation_rotation_2(roll,pitch,yaw)
+    rot_v = Transformation_rotation_2(pitch,roll,yaw)
     trans_i = Transformation_translation(x, y, z)
     P_cc = np.dot(np.linalg.inv(np.linalg.multi_dot([trans_c[1],rot_g,trans_g[1],rot_v,trans_i[0]])),C)
     q_obj = np.linalg.multi_dot([np.linalg.inv(np.linalg.multi_dot([CCM,trans_c[1],rot_g,trans_g[1],rot_v,trans_i[0]])),focal_lenght_meters,pix])
@@ -43,12 +43,15 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     r = np.sqrt(np.square(pix[0][0]-CCM[0][2])+np.square(pix[1][0]-CCM[1][2]))
     Beta = np.arctan((r/CCM[0][0])) #angle between depth and line to target from center of optical lens
     l = t_norm*np.cos(Beta)
-    T = np.linalg.inv(np.linalg.multi_dot([CCM,trans_c[1],rot_g,trans_g[1],rot_v,trans_i[0]]))
+    T = np.linalg.inv(np.linalg.multi_dot([CCM,trans_c[0],rot_g,trans_g[0],rot_v,trans_i[0]]))
 ########
 
+    p = np.array([[1], [2], [-3], [1]])
+
     Q =np.array([[l,0,0,0],[0,l,0,0],[0,0,l,0],[0,0,0,1]])
-
-
+    In = np.dot(trans_i[0],p)
+    In2 = np.linalg.multi_dot([rot_v,p])
+    in3 = np.linalg.multi_dot([trans_g[0],In2])
     inertial_frame_coord =np.linalg.multi_dot([T,Q,pix])
 #results
     target_location  = inertial_frame_coord[:3]
@@ -58,7 +61,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
 
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 0,y = 0, z = 50,roll=0,yaw=0,pitch=-np.pi,g_roll=0, g_yaw=0, g_pitch=(4/3)*np.pi, calibration = True)
+    coor_camera_to_inertial_frame (x = 10,y = 20 , z = -30,roll=0,yaw=0,pitch=np.pi/2,g_roll=0, g_yaw=0, g_pitch=(4/3)*np.pi, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
