@@ -66,7 +66,7 @@ def change_ext(directory,init,out):
 #this file contains all transformation matricies for the geo-location of the target
 
 def Transformation_translation(x, y, z):
-    T_translation = np.array([[1,0,0,x],[0,1,0,y],[0,0,1,-z],[0,0,0,1]])
+    T_translation = np.array([[1,0,0,-x],[0,1,0,-y],[0,0,1,-z],[0,0,0,1]])
     T_translation_inverse = np.linalg.inv(T_translation)
     return T_translation, T_translation_inverse
 
@@ -85,6 +85,10 @@ def Pix2feet(n_pix):
     n_feet = 0.00086805544619423*n_pix
 
     return n_feet
+
+def gimbal_rot(el,az):
+    rot = np.array([[math.cos(el)*math.cos(az), math.cos(el)*math.sin(az), math.sin(el),0],[-math.sin(el),math.cos(az),0,0],[-math.sin(el)*math.cos(az),-math.sin(el)*math.sin(az),math.cos(el),0],[0,0,0,1]])
+    return rot
 
 def camera_calibration_matrix(foc_x,foc_y,f_theta,c_x,c_y):
     #foc_x = width pixel
