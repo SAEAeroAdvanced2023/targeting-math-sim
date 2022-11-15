@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import copy
 import os
 import math
@@ -128,7 +128,7 @@ def camera_calibration_matrix_2():
     prev_img_shape = None
     # Extracting path of individual image stored in a given directory
     source_path =  r'C:\Users\melzo\OneDrive\Documents\GitHub\targeting-math-sim\images'
-    images = [f for f in glob.glob('images/*.jpg')]
+    images = [f for f in glob.glob('images2/*.jpg')]
     #images = glob.glob('./images/*.jpg')
 
 
