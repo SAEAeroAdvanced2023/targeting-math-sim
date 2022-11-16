@@ -21,13 +21,15 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         CCM = np.vstack([CCM, newrow])
 
 #given
+    width = 640
+
     #target coord in camera
-    pix = np.array([[963],[616],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
+    pix = np.array([[334+(334-280)],[263-(263-152)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
     #distance of center of rotation of gimbal from centroid of PA
-    g_dist = np.array([0,-5,3])
+    g_dist = np.array([0,0,0])
     #distance of camera center vision from center of rotation of gimbal
-    c_dist = np.array([-2,0,0])
-    f = 1450*0.0003741
+    c_dist = np.array([0,0,0])
+    f = CCM[0][0]/width
     focal_lenght_meters =np.array([[f,0,0,0],[0,f,0,0],[0,0,f,0],[0,0,0,1]])
     cam = np.array([[0, 0, 1, 0], [0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 1]])
 #########
@@ -76,13 +78,13 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     c_t = [t[0]-(in2body[0][0]+b_g[0]+g_c[0]), t[1]-(in2body[1][0]+b_g[1]+g_c[1]), t[2]-(in2body[2][0]+b_g[2]+g_c[2])]
     start = [0,0,0]
     ax.quiver(start[0],start[1],start[2],in2body[0][0],in2body[1][0],in2body[2][0]) #inertial to body
-    ax.quiver(in2body[0][0], in2body[1][0], in2body[2][0], b_g[0], b_g[1], b_g[2], color='r') #body to gimbal
+    ax.quiver(in2body[0][0], in2body[1][0], in2body[2][0], b_g[0], b_g[1], b_g[2], color='y') #body to gimbal
     ax.quiver(b_g[0]+in2body[0][0], b_g[1]+in2body[1][0], b_g[2]+in2body[2][0],g_c[0],g_c[1],g_c[2], color = 'g') #gimbal to cam
     ax.quiver(b_g[0]+in2body[0][0]+g_c[0], b_g[1]+in2body[1][0]+g_c[1], b_g[2]+in2body[2][0]+g_c[2],c_t[0],c_t[1],c_t[2], color = 'r') #cam to target
 
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 10,y = 15 , z = -20,roll=0,yaw=0,pitch=0,g_roll=0, g_yaw=0, g_pitch=np.pi/2, calibration = True)
+    coor_camera_to_inertial_frame (x = -23,y = 210 , z = -210,roll=-np.pi/2,yaw=0,pitch=np.pi/2,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation

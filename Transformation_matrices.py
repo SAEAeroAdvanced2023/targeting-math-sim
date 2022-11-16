@@ -128,7 +128,7 @@ def camera_calibration_matrix_2():
     prev_img_shape = None
     # Extracting path of individual image stored in a given directory
     source_path =  r'C:\Users\melzo\OneDrive\Documents\GitHub\targeting-math-sim\images'
-    images = [f for f in glob.glob('images/*.jpg')]
+    images = [f for f in glob.glob('images2/*.jpg')]
     #images = glob.glob('./images/*.jpg')
 
 
@@ -155,12 +155,15 @@ def camera_calibration_matrix_2():
         #cv2.waitKey(0)
     cv2.destroyAllWindows()
     h, w = img.shape[:2]
+
+
     """
     Performing camera calibration by
     passing the value of known 3D points (objpoints)
     and corresponding pixel coordinates of the
     detected corners (imgpoints)
     """
+
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     print("Camera matrix : n")
     print(mtx)
