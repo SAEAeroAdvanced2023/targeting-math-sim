@@ -78,7 +78,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     ax = plt.axes(projection = '3d')
     ax.set_xlim([-10,30])
     ax.set_ylim([-20,20])
-    ax.set_zlim([-30,0])
+    ax.set_zlim([-30,0]) 
     b_g = [body2gim[0][0]-in2body[0][0] ,
               body2gim[1][0]-in2body[1][0], body2gim[2][0]-in2body[2][0]]
 
