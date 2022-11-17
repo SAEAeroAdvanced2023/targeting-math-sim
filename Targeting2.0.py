@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 
 def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,calibration):
+    pitch = -pitch
+    roll = roll
 
     C = np.array([[0], [0], [0], [1]])
 #camera calibration
@@ -20,16 +22,21 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         newrow = np.array([0, 0, 0, 1])
         CCM = np.vstack([CCM, newrow])
 
+        pix_x = 280
+        pix_y = 280
 #given
     width = 640
 
     #target coord in camera
-    pix = np.array([[334+(334-280)],[263-(263-152)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
+
+    pix = np.array([[334.286+(334.286-pix_x)],[263.44+(263.44-pix_y)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
     #distance of center of rotation of gimbal from centroid of PA
-    g_dist = np.array([0,0,0])
+    g_dist = np.array([0,-0,0])
     #distance of camera center vision from center of rotation of gimbal
     c_dist = np.array([0,0,0])
-    f = CCM[0][0]/width
+    f = 0.035
+    #f = 650*0.0003741
+
     focal_lenght_meters =np.array([[f,0,0,0],[0,f,0,0],[0,0,f,0],[0,0,0,1]])
     cam = np.array([[0, 0, 1, 0], [0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 1]])
 #########
@@ -84,11 +91,11 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
 
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = -23,y = 210 , z = -210,roll=-np.pi/2,yaw=0,pitch=np.pi/2,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
+    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -150,roll=0,yaw=0,pitch=-0.436,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
+#follows right hand rule convention
 
-
-
+#make yaw
 #angles in rad
