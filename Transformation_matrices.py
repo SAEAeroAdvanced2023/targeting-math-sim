@@ -70,13 +70,11 @@ def Transformation_translation(x, y, z):
     T_translation_inverse = np.linalg.inv(T_translation)
     return T_translation, T_translation_inverse
 
-def Transformation_rotation(phi,psi,t):
-    #phi = roll
-    #psi = yaw
-    #t = pitch
-    T_rotation = np.array([[math.cos(t)*math.cos(psi),-math.cos(phi)*math.sin(psi)+math.sin(phi)*math.sin(t)*math.cos(psi),math.sin(phi)*math.sin(psi)+math.cos(phi)*math.sin(t)*math.cos(psi),0],[math.cos(t)*math.sin(psi),math.cos(phi)*math.cos(psi)+math.sin(phi)*math.sin(t)*math.sin(psi),-math.sin(phi)*math.cos(psi)+math.cos(phi)*math.sin(t)*math.sin(psi),0],[-math.sin(t),math.sin(phi)*math.cos(t),math.cos(phi)*math.cos(t),0],[0,0,0,1]])
-    T_rotation_inverse = np.linalg.inv(T_rotation)
-    return T_rotation,T_rotation_inverse
+def Transformation_rotation(a,b,c):
+
+
+    T_rotation = np.array([[math.cos(a)*math.cos(b), math.cos(a)*math.sin(b)*math.sin(c)-math.sin(a)*math.cos(c), math.cos(a)*math.sin(b)*math.cos(c)+math.sin(a)*math.sin(c), 0],[math.sin(a)*math.cos(b), math.sin(a)*math.sin(b)*math.sin(c)+math.cos(a)*math.cos(c), math.sin(a)*math.sin(b)*math.cos(c)-math.cos(a)*math.sin(c), 0],[-math.sin(b), math.cos(b)*math.sin(c), math.cos(b)*math.cos(c), 0],[0, 0, 0, 1]])
+    return T_rotation
 
 def Transformation_rotation_2(t,phi,psi):
     T_rotation2 = np.array([[math.cos(t)*math.cos(psi),math.cos(t)*math.sin(psi),-math.sin(t),0],[math.sin(phi)*math.sin(t)*math.cos(psi)-math.cos(phi)*math.sin(psi),math.sin(phi)*math.sin(t)*math.sin(psi)+math.cos(phi)*math.cos(psi),math.sin(phi)*math.cos(t),0],[math.cos(phi)*math.sin(t)*math.cos(psi)+math.sin(phi)*math.sin(psi),math.cos(phi)*math.sin(t)*math.sin(psi)-math.sin(phi)*math.cos(psi), math.cos(phi)*math.cos(t),0],[0,0,0,1]])
