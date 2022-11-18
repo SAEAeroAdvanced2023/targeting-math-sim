@@ -153,12 +153,15 @@ def camera_calibration_matrix_2():
         #cv2.waitKey(0)
     cv2.destroyAllWindows()
     h, w = img.shape[:2]
+
+
     """
     Performing camera calibration by
     passing the value of known 3D points (objpoints)
     and corresponding pixel coordinates of the
     detected corners (imgpoints)
     """
+
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     print("Camera matrix : n")
     print(mtx)
