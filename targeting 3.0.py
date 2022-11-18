@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pandas as pd
 import copy
@@ -8,47 +10,52 @@ import matplotlib.pyplot as plt
 
 
 def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,calibration):
-    #pitch = -pitch
-    #roll = roll
+
 
     C = np.array([[0], [0], [0], [1]])
 #camera calibration
     if(calibration):
         CCM = camera_calibration_matrix_2()
         column_to_be_added = np.array([[0], [0], [0]])
-
+        CCM_inv = np.linalg.inv(CCM)
         # Adding column to array using append() method
-        CCM = np.append(CCM, column_to_be_added, axis=1)
+        CCM_inv = np.append(CCM_inv, column_to_be_added, axis=1)
         newrow = np.array([0, 0, 0, 1])
-        CCM = np.vstack([CCM, newrow])
+        CCM_inv = np.vstack([CCM_inv, newrow])
 
-        pix_x = 334.286
-        pix_y = 263.44
+        pix_x = 334
+        pix_y = 263
 #given
     #target coord in camera
-    pix = np.array([[334.286+(334.286-pix_x)],[263.44+(263.44-pix_y)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
+    #pix = np.array([[334.286+(334.286-pix_x)],[263.44+(263.44-pix_y)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
+    pix = np.array([[pix_x], [pix_y], [1], [1]])
     #distance of center of rotation of gimbal from centroid of PA
-    g_dist = np.array([0,-0,0])
+    g_dist = np.array([0,0,0])
     #distance of camera center vision from center of rotation of gimbal
     c_dist = np.array([0,0,0])
     f = 0.035
     #f = 650*0.0003741
     focal_lenght_meters =np.array([[f,0,0,0],[0,f,0,0],[0,0,f,0],[0,0,0,1]])
-    cam = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    cam = np.array([[0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]])
+    cc = np.array([[1, 0, 0, 0], [0, 0, -1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
 #########
     trans_c = Transformation_translation(c_dist[0], c_dist[1], c_dist[2])
     rot_g = Transformation_rotation(g_pitch, g_roll, g_yaw)
     trans_g = Transformation_translation(g_dist[0], g_dist[1], g_dist[2])
     rot_v = Transformation_rotation(yaw,pitch,roll)
     trans_i = Transformation_translation(x, y, z)
-    P_cc = np.dot(np.linalg.inv(np.linalg.multi_dot([trans_c[0],rot_g,trans_g[0],rot_v,trans_i[0]])),C)
-    q_obj = np.linalg.multi_dot([np.linalg.inv(np.linalg.multi_dot([CCM,cam,trans_c[0],rot_g,trans_g[0],rot_v,trans_i[0]])), focal_lenght_meters,pix])
+    P_cc = np.linalg.multi_dot([np.linalg.inv(np.linalg.multi_dot([trans_c[0],rot_g,trans_g[0],trans_i[0]])), rot_v,C])
+    q_obj = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, cc,CCM_inv,focal_lenght_meters,pix])
     t = isect_line_plane_v3(P_cc[:3],q_obj[:3],[1,1,0],[0,0,1])
+    c1 = np.linalg.multi_dot([focal_lenght_meters,rot_v,cam,np.dot(CCM_inv,pix)])
+    c2 = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, CCM_inv,focal_lenght_meters,pix])
+
     t_norm = np.linalg.norm((t-P_cc[:3]),2)
     r = np.sqrt(np.square(pix[0][0]-CCM[0][2])+np.square(pix[1][0]-CCM[1][2]))
-    Beta = np.arctan((r/CCM[0][0])) #angle between depth and line to target from center of optical lens
+    Beta = np.arctan((r/(CCM[0][0]+CCM[1][1])/2)) #angle between depth and line to target from center of optical lens
     l = t_norm*np.cos(Beta)
-    T = np.linalg.inv(np.linalg.multi_dot([CCM,cam,trans_c[0],rot_g,trans_g[0],rot_v,trans_i[0]]))
+    T = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, CCM_inv])
+
 ########
 
     p = np.array([[1], [2], [-3], [1]])
@@ -85,9 +92,14 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     ax.quiver(b_g[0]+in2body[0][0], b_g[1]+in2body[1][0], b_g[2]+in2body[2][0],g_c[0],g_c[1],g_c[2], color = 'g') #gimbal to cam
     ax.quiver(b_g[0]+in2body[0][0]+g_c[0], b_g[1]+in2body[1][0]+g_c[1], b_g[2]+in2body[2][0]+g_c[2],c_t[0],c_t[1],c_t[2], color = 'r') #cam to target
 
+    p = np.array([[1], [2], [-3], [1]])
+    rot_v = Transformation_rotation(yaw, pitch, roll)
+    T1 = np.linalg.multi_dot([rot_v,p])
+
+
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -150,roll=0,yaw=0,pitch=-np.pi/2,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
+    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=0,pitch=0,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
@@ -95,3 +107,7 @@ if __name__ == '__main__':
 
 #make yaw
 #angles in rad
+#yaw pitch roll convention
+
+#yaw: counterclockwise: positive
+#pitch: counterclockwise positive
