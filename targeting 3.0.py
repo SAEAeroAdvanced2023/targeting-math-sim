@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 
 
 def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,calibration):
-    pitch = np.pi+pitch
+    pitch = np.pi+pitch #insert a pitch matrix to replace this
     roll = -roll
     yaw = yaw
 
     #g_pitch = np.pi + g_pitch
     g_roll = -g_roll
-    #g_yaw = g_yaw
+    g_yaw = g_yaw
 
 
 
@@ -35,7 +35,6 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         pix_y = 200
 #given
     #target coord in camera
-    #pix = np.array([[334.286+(334.286-pix_x)],[263.44+(263.44-pix_y)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
     pix = np.array([[pix_x], [pix_y], [1], [1]])
     #distance of center of rotation of gimbal from centroid of PA
     g_dist = np.array([0,0,0])
