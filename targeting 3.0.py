@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 
 def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,calibration):
-
+    pitch = np.pi+pitch
+    roll = np.pi+roll
 
     C = np.array([[0], [0], [0], [1]])
 #camera calibration
@@ -23,8 +24,8 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         newrow = np.array([0, 0, 0, 1])
         CCM_inv = np.vstack([CCM_inv, newrow])
 
-        pix_x = 334
-        pix_y = 263
+        pix_x = 335
+        pix_y = 200
 #given
     #target coord in camera
     #pix = np.array([[334.286+(334.286-pix_x)],[263.44+(263.44-pix_y)],[1],[1]]) #x_pix,y_pix, l= depth, last is always 1
@@ -36,35 +37,36 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     f = 0.035
     #f = 650*0.0003741
     focal_lenght_meters =np.array([[f,0,0,0],[0,f,0,0],[0,0,f,0],[0,0,0,1]])
-    cam = np.array([[0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]])
-    cc = np.array([[1, 0, 0, 0], [0, 0, -1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
+    cam = np.array([[0, 0, -1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]])
+    cc = np.array([[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    im = np.array([[f, 0, 0, 0], [0, f, 0, 0], [0, 0, f, 0], [0, 0, 0, 1]])
 #########
     trans_c = Transformation_translation(c_dist[0], c_dist[1], c_dist[2])
     rot_g = Transformation_rotation(g_pitch, g_roll, g_yaw)
     trans_g = Transformation_translation(g_dist[0], g_dist[1], g_dist[2])
     rot_v = Transformation_rotation(yaw,pitch,roll)
     trans_i = Transformation_translation(x, y, z)
-    P_cc = np.linalg.multi_dot([np.linalg.inv(np.linalg.multi_dot([trans_c[0],rot_g,trans_g[0],trans_i[0]])), rot_v,C])
-    q_obj = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, cc,CCM_inv,focal_lenght_meters,pix])
+    P_cc = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]),C])
+    q_obj = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, im, cc,CCM_inv,pix])
     t = isect_line_plane_v3(P_cc[:3],q_obj[:3],[1,1,0],[0,0,1])
-    c1 = np.linalg.multi_dot([focal_lenght_meters,rot_v,cam,np.dot(CCM_inv,pix)])
-    c2 = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, CCM_inv,focal_lenght_meters,pix])
 
     t_norm = np.linalg.norm((t-P_cc[:3]),2)
     r = np.sqrt(np.square(pix[0][0]-CCM[0][2])+np.square(pix[1][0]-CCM[1][2]))
     Beta = np.arctan((r/(CCM[0][0]+CCM[1][1])/2)) #angle between depth and line to target from center of optical lens
     l = t_norm*np.cos(Beta)
-    T = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, CCM_inv])
+    Q =np.array([[l,0,0,0],[0,l,0,0],[0,0,l,0],[0,0,0,1]])
+    T = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, Q, cc,CCM_inv,])
+
 
 ########
 
     p = np.array([[1], [2], [-3], [1]])
 
-    Q =np.array([[l,0,0,0],[0,l,0,0],[0,0,l,0],[0,0,0,1]])
+    Q =np.array([[-l,0,0,0],[0,-l,0,0],[0,0,-l,0],[0,0,0,1]])
     In = np.dot(trans_i[0],p)
     In2 = np.linalg.multi_dot([rot_v,p])
     in3 = np.linalg.multi_dot([trans_g[0],In2])
-    inertial_frame_coord =np.linalg.multi_dot([T,Q,pix])
+    inertial_frame_coord =np.linalg.multi_dot([T,pix])
 #results
     target_location  = inertial_frame_coord[:3]
     latitude = inertial_frame_coord[0]
@@ -99,7 +101,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
 
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=0,pitch=0,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
+    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=np.pi/2,pitch=0,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
