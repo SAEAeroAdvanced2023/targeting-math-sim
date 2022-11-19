@@ -31,7 +31,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         newrow = np.array([0, 0, 0, 1])
         CCM_inv = np.vstack([CCM_inv, newrow])
 
-        pix_x = 334.28368528
+        pix_x = 0
         pix_y = 0
 #given
     #target coord in camera
@@ -54,7 +54,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     trans_i = Transformation_translation(x, y, z)
     P_cc = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]),C])
     q_obj = np.linalg.multi_dot([np.linalg.inv(trans_i[0]),rot_v, np.linalg.inv(trans_g[0]),rot_g, np.linalg.inv(trans_c[0]), cam, im, cc,CCM_inv,pix])
-    t = isect_line_plane_v3(P_cc[:3],q_obj[:3],[1,1,0],[0,0,1])
+    t = isect_line_plane_v3(P_cc[:3],q_obj[:3],[1,1,0],[0,0,1]) #plane vector can be changed depending on the slating of ground
 
     t_norm = np.linalg.norm((t-P_cc[:3]),2)
     r = np.sqrt(np.square(pix[0][0]-CCM[0][2])+np.square(pix[1][0]-CCM[1][2]))
@@ -74,10 +74,33 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     in3 = np.linalg.multi_dot([trans_g[0],In2])
     inertial_frame_coord =np.linalg.multi_dot([T,pix])
 #results
+    #1 Matrices method
+
     target_location  = inertial_frame_coord[:3]
     latitude = inertial_frame_coord[0]
     longitude = inertial_frame_coord[1]
     height = inertial_frame_coord[2]
+
+    #2 line plane intersection method
+
+    latitude1 = t[0]
+    longitude1 = t[1]
+    height1 = t[2]
+
+    #error
+    error_lat =  np.abs((latitude1-latitude)/latitude1)*100
+    error_long =  np.abs((longitude1-longitude)/longitude1)*100
+    height_diff =  np.abs((height1-height))
+    total_error = np.average([error_lat,error_long])
+
+    if total_error<= 1:
+        print('very accurate result')
+    elif total_error<= 5 and total_error> 5:
+        print('very accurate result')
+    else:
+        print('very accurate result')
+
+    #add weighted average based on camera angle and position of object in sensor frame
 
 #plots
     cam2target = t[:3] # no need
@@ -100,14 +123,11 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     ax.quiver(b_g[0]+in2body[0][0], b_g[1]+in2body[1][0], b_g[2]+in2body[2][0],g_c[0],g_c[1],g_c[2], color = 'g') #gimbal to cam
     ax.quiver(b_g[0]+in2body[0][0]+g_c[0], b_g[1]+in2body[1][0]+g_c[1], b_g[2]+in2body[2][0]+g_c[2],c_t[0],c_t[1],c_t[2], color = 'r') #cam to target
 
-    p = np.array([[1], [2], [-3], [1]])
-    rot_v = Transformation_rotation(yaw, pitch, roll)
-    T1 = np.linalg.multi_dot([rot_v,p])
 
 
-    return latitude,longitude,height
+    return latitude1,longitude1,height1,total_error
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=0,pitch=-np.pi/3,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
+    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=np.pi/2,yaw=0,pitch=-np.pi/5,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
