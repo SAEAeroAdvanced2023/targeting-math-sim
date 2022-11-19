@@ -11,7 +11,14 @@ import matplotlib.pyplot as plt
 
 def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,calibration):
     pitch = np.pi+pitch
-    roll = np.pi+roll
+    roll = -roll
+    yaw = yaw
+
+    #g_pitch = np.pi + g_pitch
+    g_roll = -g_roll
+    #g_yaw = g_yaw
+
+
 
     C = np.array([[0], [0], [0], [1]])
 #camera calibration
@@ -24,7 +31,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
         newrow = np.array([0, 0, 0, 1])
         CCM_inv = np.vstack([CCM_inv, newrow])
 
-        pix_x = 335
+        pix_x = 300
         pix_y = 200
 #given
     #target coord in camera
@@ -42,7 +49,7 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
     im = np.array([[f, 0, 0, 0], [0, f, 0, 0], [0, 0, f, 0], [0, 0, 0, 1]])
 #########
     trans_c = Transformation_translation(c_dist[0], c_dist[1], c_dist[2])
-    rot_g = Transformation_rotation(g_pitch, g_roll, g_yaw)
+    rot_g = Transformation_rotation(g_yaw, g_pitch, g_roll)
     trans_g = Transformation_translation(g_dist[0], g_dist[1], g_dist[2])
     rot_v = Transformation_rotation(yaw,pitch,roll)
     trans_i = Transformation_translation(x, y, z)
@@ -101,15 +108,13 @@ def coor_camera_to_inertial_frame (x,y,z,roll,yaw,pitch,g_roll, g_yaw, g_pitch,c
 
     return latitude,longitude,height
 if __name__ == '__main__':
-    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=np.pi/2,pitch=0,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
+    coor_camera_to_inertial_frame (x = 0,y = 0 , z = -210,roll=0,yaw=0,pitch=0,g_roll=0, g_yaw=0, g_pitch=0, calibration = True)
 #xyz = longitude,latitude and height of PA
 #g_a_dist = distance in x y z from the centroi of PA to gimbal
 #g_roll, g_yaw, g_pitch = gimbal's rotation
 #follows right hand rule convention
 
-#make yaw
 #angles in rad
 #yaw pitch roll convention
 
-#yaw: counterclockwise: positive
-#pitch: counterclockwise positive
+#follow convention NED (North East Down)
