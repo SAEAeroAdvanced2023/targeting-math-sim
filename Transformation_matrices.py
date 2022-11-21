@@ -63,55 +63,36 @@ def change_ext(directory,init,out):
 
             print(os.path.join("/mydir", file))
 
-#this file contains all transformation matricies for the geo-location of the target
 
+# translation matrix
 def Transformation_translation(x, y, z):
     T_translation = np.array([[1,0,0,-x],[0,1,0,-y],[0,0,1,-z],[0,0,0,1]])
     T_translation_inverse = np.linalg.inv(T_translation)
     return T_translation, T_translation_inverse
 
+# 3 dimension rotation matrix following the given convention (yaw,pitch,roll)
 def Transformation_rotation(a,b,c):
-
-
     T_rotation = np.array([[math.cos(a)*math.cos(b), math.cos(a)*math.sin(b)*math.sin(c)-math.sin(a)*math.cos(c), math.cos(a)*math.sin(b)*math.cos(c)+math.sin(a)*math.sin(c), 0],[math.sin(a)*math.cos(b), math.sin(a)*math.sin(b)*math.sin(c)+math.cos(a)*math.cos(c), math.sin(a)*math.sin(b)*math.cos(c)-math.cos(a)*math.sin(c), 0],[-math.sin(b), math.cos(b)*math.sin(c), math.cos(b)*math.cos(c), 0],[0, 0, 0, 1]])
     return T_rotation
 
+# not in use
 def Transformation_rotation_2(t,phi,psi):
     T_rotation2 = np.array([[math.cos(t)*math.cos(psi),math.cos(t)*math.sin(psi),-math.sin(t),0],[math.sin(phi)*math.sin(t)*math.cos(psi)-math.cos(phi)*math.sin(psi),math.sin(phi)*math.sin(t)*math.sin(psi)+math.cos(phi)*math.cos(psi),math.sin(phi)*math.cos(t),0],[math.cos(phi)*math.sin(t)*math.cos(psi)+math.sin(phi)*math.sin(psi),math.cos(phi)*math.sin(t)*math.sin(psi)-math.sin(phi)*math.cos(psi), math.cos(phi)*math.cos(t),0],[0,0,0,1]])
     return T_rotation2
-def Pix2feet(n_pix):
-    n_feet = 0.00086805544619423*n_pix
 
-    return n_feet
-
+# not in use
 def gimbal_rot(el,az):
     rot = np.array([[math.cos(el)*math.cos(az), math.cos(el)*math.sin(az), math.sin(el),0],[-math.sin(el),math.cos(az),0,0],[-math.sin(el)*math.cos(az),-math.sin(el)*math.sin(az),math.cos(el),0],[0,0,0,1]])
     return rot
 
-def camera_calibration_matrix(foc_x,foc_y,f_theta,c_x,c_y):
-    #foc_x = width pixel
-    #foc_y = height pixel
-    #f_theta = skiew (shear)
-    #cx and cy principal points
-    #if analog camera shear angle not equal 0, digitial shear angle close to
-    CCM = np.array([[foc_x,f_theta,c_x],[0,foc_y,c_y],[0,0,1]])
-    CCM_inv = np.linalg.inv(CCM)
-    # Array to be added as column
-    column_to_be_added = np.array([[0], [0], [0]])
-
-    # Adding column to array using append() method
-    A= np.append(CCM_inv, column_to_be_added, axis=1)
-    newrow = [0, 0, 0, 1]
-    A = np.vstack([A, newrow])
-    return A
-   # https: // www.mathworks.com / help / vision / ref / cameracalibrator - app.html
-   # https: // www.youtube.com / watch?v = nRVuLFQ_Bng & ab_channel = CyrillStachniss
-def camera_calibration_matrix_2():
-    #https: // www.analyticsvidhya.com / blog / 2021 / 10 / a - comprehensive - guide -for -camera - calibration - in -computer - vision /  #:~:text=The%20camera%20matrix%20is%20a,algorithm%20computes%20the%20camera%20matrix.
+# camera calibration + distortion
+def camera_calibration_matrix():
+    # https: // www.mathworks.com / help / vision / ref / cameracalibrator - app.html
+    # https: // www.youtube.com / watch?v = nRVuLFQ_Bng & ab_channel = CyrillStachniss
+    # https: // www.analyticsvidhya.com / blog / 2021 / 10 / a - comprehensive - guide -for -camera - calibration - in -computer - vision /  #:~:text=The%20camera%20matrix%20is%20a,algorithm%20computes%20the%20camera%20matrix.
 
     import cv2
     import numpy as np
-    import os
     import glob
     # Defining the dimensions of checkerboard
     CHECKERBOARD = (7, 10)
@@ -173,7 +154,6 @@ def camera_calibration_matrix_2():
     print(tvecs)
 
     return mtx
-
 
 # intersection function
 def isect_line_plane_v3(p0, p1, p_co, p_no, epsilon=1e-6):

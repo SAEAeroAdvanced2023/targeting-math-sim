@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d9919dc3-037c-4a8e-9ca0-d46dace799a6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Transformation_matrices.py" beforeDir="false" afterPath="$PROJECT_DIR$/Transformation_matrices.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/targeting 3.0.py" beforeDir="false" afterPath="$PROJECT_DIR$/targeting 3.0.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -156,10 +157,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/targeting 3.0.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="13" />
+          <line>79</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>
