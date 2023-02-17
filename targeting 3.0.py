@@ -67,20 +67,20 @@ def coor_camera_to_inertial_frame (v_dist,roll,yaw,pitch,g_roll, g_yaw, g_pitch,
 # results
 
 # 1 line plane intersection method
-    latitude = t[0]
-    longitude = t[1]
+    y_coord = t[0]
+    x_coord = t[1]
     height = t[2]
 
 # 2 Validation
-    latitude1 = inertial_frame_coord[0]
-    longitude1 = inertial_frame_coord[1]
+    y_coord1 = inertial_frame_coord[0]
+    x_coord1 = inertial_frame_coord[1]
     height1 = inertial_frame_coord[2]
 
 # error
-    error_lat =  np.abs((latitude1-latitude)/latitude1)*100
-    error_long =  np.abs((longitude1-longitude)/longitude1)*100
+    error_y_coord =  np.abs((y_coord1-y_coord)/y_coord1)*100
+    error_x_coord =  np.abs((x_coord1-x_coord)/x_coord1)*100
     height_diff =  np.abs((height1-height))
-    total_error = np.average([error_lat,error_long])
+    total_error = np.average([error_y_coord,error_x_coord])
 
     if total_error<= 1:
         print('very accurate result')
@@ -115,38 +115,39 @@ def coor_camera_to_inertial_frame (v_dist,roll,yaw,pitch,g_roll, g_yaw, g_pitch,
         ax.quiver(b_g[0]+in2body[0][0], b_g[1]+in2body[1][0], b_g[2]+in2body[2][0],g_c[0],g_c[1],g_c[2], color = 'g') #gimbal to cam
         ax.quiver(b_g[0]+in2body[0][0]+g_c[0], b_g[1]+in2body[1][0]+g_c[1], b_g[2]+in2body[2][0]+g_c[2],c_t[0],c_t[1],c_t[2], color = 'r') #cam to target
 
-    return latitude1,longitude1,height1,total_error
+    return x_coord1,y_coord1,height1,total_error
 if __name__ == '__main__':
 # camera calibration matrices
     CCM_inv = np.array([[0.00154274,0.,-0.51571205,0.], [0.,0.0015459,-0.40726403,0.], [ 0.,0.,1.,0.], [ 0.,0.,0.,1.]])
     CCM = np.array([[648.19832304,0.,334.28368528], [0.,646.87336044,263.44824863], [0.,0.,1.]])
 # pixels seen in sensor frame
-    pix_x = 0
+    pix_x = 334
     pix_y = 0
 # vehicule distance from inertial point (GPS coordinates)
-    v_dist = np.array([0, 0, -210])
+    v_dist = np.array([0, 0, -100])
 # coordinates of gimbal wtr to centroid of the aircraft
     g_dist = np.array([0, 0, 0])
 # distance of camera center vision from center of rotation of gimbal
     c_dist = np.array([0,0,0])
 # yaw, pitch, roll = aircraft rotation
     yaw=0
-    pitch=-np.pi/5
-    roll=np.pi/2
+    pitch=-np.pi/2
+    roll=0
 
 #g_yaw, g_pitch, g_roll = gimbal's rotation
     g_yaw=0
     g_pitch=0
     g_roll=0
 
-# focal length of camera in meters
-    f = 0.035
+# focal length of camera in meters (no need to be used)
+    f = 0.0035
 # ground definition ( point & normal vector)
     gnd = np.array([[1,1,0],[0,0,1]])
 
 
 #follows right hand rule convention
 #follow convention NED (North East Down)
+# 3 dimension rotational matrix following the given convention (yaw,pitch,roll)
 #angles in radiants
 
     coor_camera_to_inertial_frame (v_dist=v_dist, yaw=yaw, pitch=pitch, roll=roll, g_yaw=g_yaw, g_pitch=g_pitch, g_roll=g_roll, CCM=CCM, CCM_inv=CCM_inv, pix_x=pix_x, pix_y=pix_y, g_dist=g_dist, c_dist=c_dist, f=f, gnd=gnd, plots=False)
